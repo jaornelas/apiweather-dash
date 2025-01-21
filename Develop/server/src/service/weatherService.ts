@@ -1,3 +1,4 @@
+import dayjs, { type Dayjs } from 'dayjs';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -43,12 +44,17 @@ class WeatherService {
 
   private apiKey?: string;
 
-  private cityName = '';
+  private city = '';
 
   constructor() {
     this.baseURL = process.env.API_BASE_URL || '';
     this.apiKey = process.env.API_KEY || '';
   }
+
+  // private convertKelvinToFahrenheit(kelvin: number): number {
+  //   console.log(kelvin);
+  //   return parseFloat(((kelvin - 273.15) * (9 / 5) + 32).toFixed(1));
+  // }
 
   // TODO: Create fetchLocationData method
   private async fetchLocationData(query: string) {
@@ -57,8 +63,17 @@ class WeatherService {
         throw new Error('Base URL is not defined or Key is missing');
       }
 
-      const response: Coordinates[] = await fetch(query).then((res) => res.json());
-      return response;
+      const response = await fetch(query);
+      if (!response) {
+        throw new Error('Network response was not ok');
+      }
+      
+      const data: Coordinates[] = await response.json();
+      if (data.length === 0) {
+        throw new Error('No location data found');
+      }
+
+      return data[0];
     } catch (error) {
       console.error('Error fetching location data: ', error);
       throw error;
@@ -117,11 +132,11 @@ class WeatherService {
         response.list[0]
       );
 
-      const forecastWeather: Weather[] = this.buildForecastArray(
+      const forecast: Weather[] = this.buildForecastArray(
         currentWeather,
         response.list
       );
-      return forecastWeather;
+      return forecast;
     } catch (error: any) {
       console.error('Error fetching weather data: ', error);
       return error;
@@ -129,18 +144,64 @@ class WeatherService {
   }
 
   // TODO: Build parseCurrentWeather method
-  private parseCurrentWeather(response: any) {
+  private parseCurrentWeather(response: any): Weather {
+    const parsedDate = dayjs.unix(response.dt).format('MM/DD/YYYY');
 
+    const currentWeather = new Weather(
+      response.main.temp,
+      response.main.humidity,
+      response.wind.speed,
+      parsedDate,
+      response.weather[0].icon,
+      response.weather[0].description || response.weather[0].main,
+      this.city
+    );
 
-  }
+    return currentWeather;
 
+  };
 
   // TODO: Complete buildForecastArray method
-  private buildForecastArray(currentWeather: Weather, weatherData: any[]) { }
+  private buildForecastArray(currentWeather: Weather, weatherData: any[]) {
+    const weatherForecast: Weather[] = [currentWeather];
 
+    const filteredWeatherData = weatherData.filter((data: any) => {
+      return data.dt_txt.includes('12:00:00');
+    });
+
+    for (const day of filteredWeatherData) {
+      weatherForecast.push(
+        new Weather(
+          day.main.temp,
+          day.main.humidity,
+          day.main.wind,
+          day.dt_txt,
+          day.weather[0].icon,
+          day.weather[0].description || day.weather[0].main,
+          this.city
+        )
+      );
+    }
+
+    return weatherForecast;
+  }
 
   // TODO: Complete getWeatherForCity method
-  async getWeatherForCity(city: string) { }
+  async getWeatherForCity(city: string) {
+    try {
+      this.city = city;
+      const coordinates = await this.fetchAndDestructureLocationData();
+      if (coordinates) {
+        const weatherData = await this.fetchWeatherData(coordinates);
+        return weatherData;
+      }
+
+      throw new Error('Coordinates are missing');
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
 }
 
 export default new WeatherService();
