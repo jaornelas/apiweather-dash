@@ -1,4 +1,4 @@
-import dayjs, { type Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -20,7 +20,8 @@ class Weather {
   icon: string;
   iconDescription: string;
   city: string;
-  constructor(temperature: number,
+  constructor(
+    temperature: number,
     humidity: number,
     windSpeed: number,
     date: string,
