@@ -46,14 +46,10 @@ class WeatherService {
 
 
   constructor() {
-    this.baseURL = process.env.API_BASE_URL || 'https://api.openweathermap.org';
-    this.apiKey = process.env.API_KEY || 'a3cc86ac0ea4efc145faff12f3e4ee65';
+    this.baseURL = process.env.API_BASE_URL || '';
+    this.apiKey = process.env.API_KEY || '';
   }
 
-  // private convertKelvinToFahrenheit(kelvin: number): number {
-  //   console.log(kelvin);
-  //   return parseFloat(((kelvin - 273.15) * 1.8 + 32).toFixed(1));
-  // }
 
   // TODO: Create fetchLocationData method
   private async fetchLocationData(city: string) {
@@ -61,26 +57,6 @@ class WeatherService {
     //console.log(url);
     const response = await fetch(url);
     return response.json();
-    // try {
-    //   if (!this.baseURL) {
-    //     throw new Error('Base URL is not defined or Key is missing');
-    //   }
-
-    //   const response = await fetch(query);
-    //   if (!response) {
-    //     throw new Error('Network response was not ok');
-    //   }
-
-    //   const data: Coordinates[] = await response.json();
-    //   if (data.length === 0) {
-    //     throw new Error('No location data found');
-    //   }
-
-    //   return data[0];
-    // } catch (error) {
-    //   console.error('Error fetching location data: ', error);
-    //   throw error;
-    // }
   }
 
   // TODO: Create destructureLocationData method
@@ -118,27 +94,6 @@ class WeatherService {
       throw new Error('Weather data is missing');
     }
     return response.json();
-    // try {
-    //   const response = await fetch(this.buildWeatherQuery(coordinates)).then(
-    //     (res) => res.json()
-    //   );
-    //   if (!response) {
-    //     throw new Error('Weather data is missing');
-    //   }
-
-    //   const currentWeather: Weather = this.parseCurrentWeather(
-    //     response.list[0]
-    //   );
-
-    //   const forecast: Weather[] = this.buildForecastArray(
-    //     currentWeather,
-    //     response.list
-    //   );
-    //   return forecast;
-    // } catch (error: any) {
-    //   console.error('Error fetching weather data: ', error);
-    //   return error;
-    // }
   }
 
   // TODO: Build parseCurrentWeather method
