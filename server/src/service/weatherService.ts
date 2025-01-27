@@ -46,8 +46,8 @@ class WeatherService {
 
 
   constructor() {
-    this.baseURL = process.env.API_BASE_URL || '';
-    this.apiKey = process.env.API_KEY || '';
+    this.baseURL = process.env.API_BASE_URL || 'https://api.openweathermap.org';
+    this.apiKey = process.env.API_KEY || 'a3cc86ac0ea4efc145faff12f3e4ee65';
   }
 
 
